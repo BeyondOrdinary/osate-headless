@@ -43,7 +43,7 @@ import com.google.gson.JsonObject;
 public class Analyze implements IApplication {
 
 	// Bump with Bundle-Version (build.sh refuses a mismatch) whenever results can change: callers key caches on it.
-	static final String APP_VERSION = "0.2.0";
+	static final String APP_VERSION = "0.2.1";
 	static final String RESULT_SCHEMA = "osate_headless.result.v1";
 
 	@Override
@@ -181,6 +181,8 @@ public class Analyze implements IApplication {
 		t.addProperty("app_version", APP_VERSION);
 		// SHA-256 prefix of the plugin jar, passed by bin/osate-headless: the exact build, even across un-bumped rebuilds.
 		t.addProperty("build", System.getProperty("osate.headless.build", "unknown"));
+		// Content hash of every org.osate.* plugin in the install (compiler, EMV2, fault trees, propagation).
+		t.addProperty("osate_plugins", System.getProperty("osate.headless.osate_plugins", "unknown"));
 		for (String b : new String[] { "org.osate.aadl2", "org.osate.xtext.aadl2.errormodel",
 				"org.osate.aadl2.errormodel.faulttree.generation" }) {
 			Bundle bundle = Platform.getBundle(b);
