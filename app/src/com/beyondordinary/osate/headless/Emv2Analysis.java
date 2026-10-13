@@ -40,6 +40,7 @@ import org.osate.aadl2.instance.InstanceObject;
 import org.osate.aadl2.instance.SystemInstance;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorEvent;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
+import org.osate.xtext.aadl2.errormodel.errorModel.ErrorModelSubclause;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorPropagation;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorSource;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorTypes;
@@ -65,6 +66,10 @@ import com.google.gson.JsonObject;
  * some unconditional state propagations; the state trees are unioned in.</li>
  * <li>G5: an undeveloped event in a cut set means an incoming propagation
  * with no modelled source, so the tree is incomplete.</li>
+ * <li>G6 (upstream-issues/05): OSATE uses one connection error source per
+ * connection; any other declared on the same connection is dropped from
+ * every analysis, and from G3's view too, since G3 enumerates the sources
+ * OSATE resolves. Declared sources are read from the subclauses instead.</li>
  * </ul>
  */
 final class Emv2Analysis {
@@ -250,6 +255,32 @@ final class Emv2Analysis {
 						+ " has no propagation path: the sending component declares no EMV2 out propagation on that connection, so the source is ignored");
 			}
 			a.add(j);
+		}
+		// G6: every connection error source declared in a subclause, against the ones OSATE resolved above.
+		Set<ErrorSource> declared = new LinkedHashSet<>();
+		for (ComponentInstance ci : si.getAllComponentInstances()) {
+			if (ci.getComponentClassifier() == null) continue;
+			for (ErrorModelSubclause sub : EMV2Util.getAllContainingClassifierEMV2Subclauses(ci.getComponentClassifier())) {
+				declared.addAll(sub.getConnectionErrorSources());
+			}
+		}
+		for (ErrorSource es : declared) {
+			if (conn.containsKey(es)) continue;
+			String shadow = null;
+			for (ErrorSource used : conn.keySet()) {
+				if (used.getSourceModelElement() != null && used.getSourceModelElement() == es.getSourceModelElement()) shadow = used.getName();
+			}
+			String on = es.getSourceModelElement() == null ? "?" : es.getSourceModelElement().getName();
+			JsonObject j = new JsonObject();
+			j.addProperty("connection_source", es.getName());
+			j.addProperty("types", es.getTypeTokenConstraint() == null ? "" : EMV2Util.getPrintName(es.getTypeTokenConstraint()));
+			j.add("connection_instances", new JsonArray());
+			j.addProperty("reached", false);
+			if (shadow != null) j.addProperty("shadowed_by", shadow);
+			a.add(j);
+			status.unverified("G6: connection error source " + es.getName() + " on connection " + on + (shadow != null
+					? " is ignored: OSATE uses one error source per connection and took " + shadow + "; give each source its own connection"
+					: " matches no connection instance, so it is in no analysis"));
 		}
 		return a;
 	}

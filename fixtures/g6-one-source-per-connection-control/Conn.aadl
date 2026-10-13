@@ -1,0 +1,55 @@
+-- Control for upstream-issues/05: the same two threats, each on its own
+-- connection. Both sources are analysed.
+package Conn
+public
+  annex EMV2 {**
+    error types
+      Forged: type;
+      Replayed: type;
+    end types;
+  **};
+  device Tx
+    features
+      o1: out data port;
+      o2: out data port;
+    annex EMV2 {**
+      use types Conn;
+      error propagations
+        o1: out propagation {Forged, Replayed};
+        o2: out propagation {Forged, Replayed};
+      end propagations;
+    **};
+  end Tx;
+  device Rx
+    features
+      i1: in data port;
+      i2: in data port;
+    annex EMV2 {**
+      use types Conn;
+      error propagations
+        i1: in propagation {Forged, Replayed};
+        i2: in propagation {Forged, Replayed};
+      flows
+        ef1: error sink i1 {Forged, Replayed};
+        ef2: error sink i2 {Forged, Replayed};
+      end propagations;
+    **};
+  end Rx;
+  system Top
+  end Top;
+  system implementation Top.i
+    subcomponents
+      tx: device Tx;
+      rx: device Rx;
+    connections
+      c1: port tx.o1 -> rx.i1;
+      c2: port tx.o2 -> rx.i2;
+    annex EMV2 {**
+      use types Conn;
+      connection error
+        ce_forge: error source c1 {Forged};
+        ce_replay: error source c2 {Replayed};
+      end connection;
+    **};
+  end Top.i;
+end Conn;
