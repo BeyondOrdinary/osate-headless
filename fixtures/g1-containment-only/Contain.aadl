@@ -1,0 +1,42 @@
+-- Containment-only model: the receiver declares what it sinks, but the
+-- sender declares nothing it emits. OSATE builds an empty propagation graph,
+-- every analysis is empty, and nothing says why.
+package Contain
+public
+  annex EMV2 {**
+    error types
+      Forged: type;
+    end types;
+  **};
+  device Tx
+    features
+      o: out data port;
+    annex EMV2 {**
+      use types Contain;
+      error propagations
+        o: not out propagation {Forged};
+      end propagations;
+    **};
+  end Tx;
+  device Rx
+    features
+      i: in data port;
+    annex EMV2 {**
+      use types Contain;
+      error propagations
+        i: in propagation {Forged};
+      flows
+        ef: error sink i {Forged};
+      end propagations;
+    **};
+  end Rx;
+  system Top
+  end Top;
+  system implementation Top.i
+    subcomponents
+      tx: device Tx;
+      rx: device Rx;
+    connections
+      c: port tx.o -> rx.i;
+  end Top.i;
+end Contain;

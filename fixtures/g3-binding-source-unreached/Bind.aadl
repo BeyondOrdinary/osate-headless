@@ -1,0 +1,56 @@
+-- upstream-issues/03 (binding variant): a bus declares an error source on its
+-- bindings, and a connection is bound to the bus. OSATE creates a path from the
+-- bus to the connection but none from the connection to the receiver, so the
+-- receiver's fault tree shows the input as undeveloped.
+package Bind
+public
+  annex EMV2 {**
+    error types
+      Forged: type;
+    end types;
+  **};
+  bus Air
+    annex EMV2 {**
+      use types Bind;
+      error propagations
+        bindings: out propagation {Forged};
+      flows
+        es_air: error source bindings {Forged};
+      end propagations;
+    **};
+  end Air;
+  device Tx
+    features
+      o: out data port;
+      a: requires bus access Air;
+  end Tx;
+  device Rx
+    features
+      i: in data port;
+      shown: out data port;
+      a: requires bus access Air;
+    annex EMV2 {**
+      use types Bind;
+      error propagations
+        i: in propagation {Forged};
+        shown: out propagation {Forged};
+      flows
+        ef: error path i -> shown;
+      end propagations;
+    **};
+  end Rx;
+  system Top
+  end Top;
+  system implementation Top.i
+    subcomponents
+      tx: device Tx;
+      rx: device Rx;
+      air: bus Air;
+    connections
+      ba: bus access air -> tx.a;
+      bb: bus access air -> rx.a;
+      c: port tx.o -> rx.i;
+    properties
+      Actual_Connection_Binding => (reference (air)) applies to c;
+  end Top.i;
+end Bind;

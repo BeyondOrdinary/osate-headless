@@ -1,0 +1,90 @@
+-- Positive control: a sensor feeds a filter that feeds an actuator. Sensor
+-- noise is normally masked by the filter; a filter defect lets it through.
+-- Expected: verified; one minimal cut set of order 2 for bad actuation.
+package Pipeline
+public
+  with EMV2, MILSTD882, Req_Props;
+
+  annex EMV2 {**
+    error types
+      Noise: type;
+      Bad_Command: type;
+    end types;
+    error behavior Filter_Life
+      events
+        filter_defect: error event;
+      states
+        Nominal: initial state;
+        Defective: state;
+      transitions
+        t_def: Nominal -[ filter_defect ]-> Defective;
+    end behavior;
+  **};
+
+  device Sensor
+    features
+      reading: out data port;
+    properties
+      Req_Props::Requirement_IDs => ("REQ-1");
+    annex EMV2 {**
+      use types Pipeline;
+      error propagations
+        reading: out propagation {Noise};
+      flows
+        es_noise: error source reading {Noise};
+      end propagations;
+    **};
+  end Sensor;
+
+  process Filter
+    features
+      raw: in data port;
+      cmd: out data port;
+    properties
+      Req_Props::Requirement_IDs => ("REQ-2", "REQ-3");
+    annex EMV2 {**
+      use types Pipeline;
+      use behavior Pipeline::Filter_Life;
+      error propagations
+        raw: in propagation {Noise};
+        cmd: out propagation {Bad_Command};
+      flows
+        ef_mask: error sink raw {Noise};
+      end propagations;
+      component error behavior
+        propagations
+          p_leak: Defective -[ raw{Noise} ]-> cmd{Bad_Command};
+      end component;
+      properties
+        MILSTD882::Hazards => ([CrossReference => "REQ-3"; HazardTitle => "Bad actuator command";
+          Description => "Noise reaches the actuator as a command"; Phases => ("operation");
+          SeverityLevel => Critical; QualitativeProbability => Remote;]) applies to cmd.Bad_Command;
+    **};
+  end Filter;
+
+  device Actuator
+    features
+      cmd: in data port;
+    annex EMV2 {**
+      use types Pipeline;
+      error propagations
+        cmd: in propagation {Bad_Command};
+      flows
+        ef_act: error sink cmd {Bad_Command};
+      end propagations;
+    **};
+  end Actuator;
+
+  system Plant
+  end Plant;
+
+  system implementation Plant.impl
+    subcomponents
+      sensor: device Sensor;
+      filter: process Filter;
+      actuator: device Actuator;
+    connections
+      c1: port sensor.reading -> filter.raw;
+      c2: port filter.cmd -> actuator.cmd;
+  end Plant.impl;
+end Pipeline;

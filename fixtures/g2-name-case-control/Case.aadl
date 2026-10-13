@@ -1,0 +1,57 @@
+-- Control for upstream-issues/02: distinct names give the expected order-2 cut set.
+package Case
+public
+  annex EMV2 {**
+    error types
+      Forged: type;
+    end types;
+    error behavior Receiver
+      events
+        key_extracted: error event;
+      states
+        Nominal: initial state;
+        Key_Exposed: state;
+        Compromised: state;
+      transitions
+        t_exp: Nominal -[ key_extracted ]-> Key_Exposed;
+    end behavior;
+  **};
+  device Attacker
+    features
+      o: out data port;
+    annex EMV2 {**
+      use types Case;
+      error propagations
+        o: out propagation {Forged};
+      flows
+        es: error source o {Forged};
+      end propagations;
+    **};
+  end Attacker;
+  device Rx
+    features
+      i: in data port;
+    annex EMV2 {**
+      use types Case;
+      use behavior Case::Receiver;
+      error propagations
+        i: in propagation {Forged};
+      flows
+        ef: error sink i {Forged};
+      end propagations;
+      component error behavior
+        transitions
+          t_acc: Key_Exposed -[ i{Forged} ]-> Compromised;
+      end component;
+    **};
+  end Rx;
+  system Top
+  end Top;
+  system implementation Top.i
+    subcomponents
+      attacker: device Attacker;
+      rx: device Rx;
+    connections
+      c: port attacker.o -> rx.i;
+  end Top.i;
+end Case;

@@ -1,0 +1,14 @@
+{
+  "root": "Pipeline::Plant.impl",
+  "requirement_property": "Req_Props::Requirement_IDs",
+  "requirement_ids": ["REQ-1", "REQ-2", "REQ-3", "REQ-4"],
+  "fta_starts": [{"component": "filter", "start": "outgoing propagation on cmd{Bad_Command}"}],
+  "expect": {
+    "status": "verified",
+    "graph_paths_min": 2,
+    "unhandled": 0,
+    "hazards_min": 1,
+    "requirements_untraced": ["REQ-4"],
+    "cut_sets": {"filter|outgoing propagation on cmd{Bad_Command}": [["filter-filter_defect", "sensor-es_noise-noise"]]}
+  }
+}

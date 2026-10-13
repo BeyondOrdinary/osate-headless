@@ -1,0 +1,5 @@
+package PA
+public
+  bus B1
+  end B1;
+end PA;

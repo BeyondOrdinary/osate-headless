@@ -1,0 +1,2 @@
+{ "root": "PB::Top.i", "analyses": ["compile", "instantiate"],
+  "expect": { "status": "failed", "lint_codes": ["L2"], "marker_contains": "Couldn't resolve reference to BusFeatureClassifier 'PA::B1'" } }
