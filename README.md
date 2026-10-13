@@ -79,14 +79,9 @@ Treat anything but `verified` as **no evidence**, never as "no findings".
 
 `upstream-issues/` has drafts of four reports for osate/osate2, each tied to fixtures. They are not filed yet; see the checklist there.
 
-## Publishing
+## Contributing
 
-Before this repository or any part of it goes public:
-
-1. Explicit approval from BeyondOrdinary and from any program whose funding contributed to it.
-2. An export-control check.
-3. A final scan for project-specific content: no model, name, path or result from any private project.
-4. Create the public repository fresh and push to it. Do not fork a private repository: a public fork cannot be made private again.
+Issues and pull requests are welcome at <https://github.com/BeyondOrdinary/osate-headless>. A new lint or guard needs a fixture that reproduces the problem and a control model that behaves correctly, and `test/run_fixtures.py` must pass. Keep models minimal and generic: fixtures are public, so they must not come from, or resemble, any private project.
 
 ## License
 
