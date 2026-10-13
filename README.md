@@ -59,6 +59,10 @@ OSATE's own CSV reports are copied to `out/reports/`.
 
 Treat anything but `verified` as **no evidence**, never as "no findings".
 
+## Versions and caching
+
+`osate-headless version` prints `osate-headless VERSION+BUILD (org.osate.core X; ...)` without starting Java. `BUILD` is a SHA-256 prefix of the plugin jar, and each result records the same value as `tool.build` beside `tool.app_version`. A caller that caches results should key them on that line (without the `OSATE_HOME` part): a new guard, any rebuild, or an OSATE upgrade then misses the cache instead of serving a result the current build would not produce. Jar timestamps make every rebuild a new `BUILD`, which costs cache hits but never correctness. Bump `Bundle-Version` and `APP_VERSION` together whenever results can change; `build.sh` refuses a mismatch.
+
 ## Lints and guards
 
 | Code | Situation | Effect |

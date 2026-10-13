@@ -16,6 +16,9 @@ done
 "$OSATE_JAVA_HOME/bin/javac" --release 21 -nowarn -d "$work/classes" -cp "$cp" \
   $(find "$here/app/src" -name '*.java')
 version=$(sed -n 's/^Bundle-Version: //p' "$here/app/META-INF/MANIFEST.MF" | tr -d '\r')
+# Callers key result caches on this version: the manifest and APP_VERSION must agree.
+app_version=$(sed -n 's/.*APP_VERSION = "\(.*\)";.*/\1/p' "$here"/app/src/com/beyondordinary/osate/headless/Analyze.java)
+[ "$app_version" = "$version" ] || { echo "Bundle-Version $version != APP_VERSION $app_version: bump both" >&2; exit 2; }
 mkdir -p "$here/dist/plugins"
 rm -f "$here"/dist/plugins/com.beyondordinary.osate.headless_*.jar
 cp "$here/app/plugin.xml" "$work/classes/"
