@@ -1,0 +1,49 @@
+-- upstream-issues/05: two connection error sources on one connection. Both
+-- compile; OSATE analyses only one of them, and nothing reports the other.
+package Conn
+public
+  annex EMV2 {**
+    error types
+      Forged: type;
+      Replayed: type;
+    end types;
+  **};
+  device Tx
+    features
+      o: out data port;
+    annex EMV2 {**
+      use types Conn;
+      error propagations
+        o: out propagation {Forged, Replayed};
+      end propagations;
+    **};
+  end Tx;
+  device Rx
+    features
+      i: in data port;
+    annex EMV2 {**
+      use types Conn;
+      error propagations
+        i: in propagation {Forged, Replayed};
+      flows
+        ef: error sink i {Forged, Replayed};
+      end propagations;
+    **};
+  end Rx;
+  system Top
+  end Top;
+  system implementation Top.i
+    subcomponents
+      tx: device Tx;
+      rx: device Rx;
+    connections
+      c: port tx.o -> rx.i;
+    annex EMV2 {**
+      use types Conn;
+      connection error
+        ce_forge: error source c {Forged};
+        ce_replay: error source c {Replayed};
+      end connection;
+    **};
+  end Top.i;
+end Conn;

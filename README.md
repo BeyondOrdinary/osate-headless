@@ -70,6 +70,7 @@ Treat anything but `verified` as **no evidence**, never as "no findings".
 | G3 | A connection error source, or a bus `bindings` source, that no propagation path carries (upstream-issues/03) | `unverified` |
 | G4 | The tree for an outgoing propagation omits cut sets from unconditional state propagations, depending on state names (upstream-issues/04) | **Corrected:** the per-state trees are unioned in and a note is added |
 | G5 | Undeveloped events in a cut set: an incoming propagation with no modelled source | `unverified` |
+| G6 | A connection error source that OSATE never resolves: a second source on the same connection (OSATE analyses only the first, upstream-issues/05), or a source on a connection with no instance. G3 cannot see these, because it lists the sources OSATE resolves | `unverified` |
 
 ## Fixtures
 
@@ -77,7 +78,7 @@ Treat anything but `verified` as **no evidence**, never as "no findings".
 
 ## Upstream
 
-`upstream-issues/` has drafts of four reports for osate/osate2, each tied to fixtures. They are not filed yet; see the checklist there.
+`upstream-issues/` has drafts of five reports for osate/osate2, each tied to fixtures. They are not filed yet; see the checklist there.
 
 ## Contributing
 
