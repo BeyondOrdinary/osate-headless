@@ -1,0 +1,19 @@
+-- upstream-issues/01: a package-qualified bus classifier on a bus access
+-- feature does not resolve; the same name resolves on a subcomponent.
+package PB
+public
+  with PA;
+  system S1
+    features
+      x: requires bus access PA::B1;
+  end S1;
+  system Top
+  end Top;
+  system implementation Top.i
+    subcomponents
+      s: system S1;
+      b: bus PA::B1;
+    connections
+      c: bus access b <-> s.x;
+  end Top.i;
+end PB;

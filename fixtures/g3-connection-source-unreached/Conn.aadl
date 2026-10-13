@@ -1,0 +1,42 @@
+-- upstream-issues/03: a connection error source whose sending component
+-- declares no EMV2 out propagation is silently ignored: no propagation path,
+-- no fault impact row, no fault-tree event, and no warning.
+package Conn
+public
+  annex EMV2 {**
+    error types
+      Forged: type;
+    end types;
+  **};
+  device Tx
+    features
+      o: out data port;
+  end Tx;
+  device Rx
+    features
+      i: in data port;
+    annex EMV2 {**
+      use types Conn;
+      error propagations
+        i: in propagation {Forged};
+      flows
+        ef: error sink i {Forged};
+      end propagations;
+    **};
+  end Rx;
+  system Top
+  end Top;
+  system implementation Top.i
+    subcomponents
+      tx: device Tx;
+      rx: device Rx;
+    connections
+      c: port tx.o -> rx.i;
+    annex EMV2 {**
+      use types Conn;
+      connection error
+        ce_attack: error source c {Forged};
+      end connection;
+    **};
+  end Top.i;
+end Conn;

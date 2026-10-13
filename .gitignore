@@ -1,0 +1,4 @@
+dist/
+out/
+*.class
+.DS_Store

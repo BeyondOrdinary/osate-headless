@@ -1,0 +1,3 @@
+property set Req_Props is
+  Requirement_IDs: list of aadlstring applies to (all);
+end Req_Props;

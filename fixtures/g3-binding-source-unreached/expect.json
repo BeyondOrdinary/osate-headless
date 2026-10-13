@@ -1,0 +1,2 @@
+{ "root": "Bind::Top.i", "fta_starts": [{"component": "rx", "start": "outgoing propagation on shown{Forged}"}],
+  "expect": { "status": "unverified", "note_contains": "G3: binding source air.es_air" } }

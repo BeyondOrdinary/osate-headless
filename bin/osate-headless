@@ -1,0 +1,55 @@
+#!/bin/sh
+# SPDX-License-Identifier: EPL-2.0
+# osate-headless: run OSATE's AADL compiler and EMV2 analyses without the IDE.
+#
+#   osate-headless analyze REQUEST.json OUTDIR
+#   osate-headless check MODEL_DIR Package::Type.impl OUTDIR     (compile + instantiate + EMV2, no fault trees)
+#
+# Environment: OSATE_HOME (osate2.app on macOS, the install directory elsewhere).
+# Exit status: 0 analysis produced a result, 1 status "failed", 2 usage or tooling error.
+#
+# The bundled JRE is run with the Equinox launcher jar directly. The native
+# launcher (osate2.app/Contents/MacOS/osate, osate.exe) shows a modal
+# "JVM terminated. Exit code=1" dialog on any non-zero exit and blocks until
+# someone clicks it; this path never opens a window.
+set -eu
+here=$(cd "$(dirname "$0")" && pwd)
+repo=$(cd "$here/.." && pwd)
+. "$here/osate-env.sh"
+
+usage() { sed -n '3,8p' "$0" | sed 's/^# \{0,1\}//' >&2; exit 2; }
+[ $# -ge 1 ] || usage
+cmd=$1; shift
+case "$cmd" in
+  analyze) [ $# -eq 2 ] || usage; request=$1; out=$2 ;;
+  check)
+    [ $# -eq 3 ] || usage
+    out=$3; mkdir -p "$out"; request="$out/request.json"
+    model=$(cd "$1" && pwd)
+    printf '{\n  "schema": "osate_headless.request.v1",\n  "model_dir": "%s",\n  "root": "%s"\n}\n' "$model" "$2" > "$request" ;;
+  *) usage ;;
+esac
+
+dropins="${OSATE_HEADLESS_DROPINS:-$repo/dist}"
+ls "$dropins"/plugins/com.beyondordinary.osate.headless_*.jar >/dev/null 2>&1 \
+  || { echo "plugin not built: run sh $repo/build.sh (or set OSATE_HEADLESS_DROPINS)" >&2; exit 2; }
+
+mkdir -p "$out"
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+# A private configuration area keeps the OSATE install untouched and lets the
+# p2 reconciler pick up our plugin from $dropins.
+cp -R "$OSATE_ECLIPSE/configuration" "$work/configuration"
+set +e
+"$OSATE_JAVA_HOME/bin/java" -Djava.awt.headless=true \
+  -Dosgi.requiredJavaVersion=1.17 -Dosgi.framework.extensions=org.eclipse.fx.osgi \
+  -Dorg.eclipse.equinox.p2.reconciler.dropins.directory="$dropins" \
+  -Xms40m -Xmx${OSATE_HEADLESS_XMX:-1536m} --add-modules=ALL-SYSTEM \
+  -jar "$OSATE_LAUNCHER" -nosplash -consoleLog \
+  -configuration "$work/configuration" -data "$work/workspace" \
+  -application com.beyondordinary.osate.headless.analyze \
+  -request "$request" -out "$out" > "$out/osate.log" 2>&1
+rc=$?
+set -e
+grep '^status:' "$out/osate.log" || tail -20 "$out/osate.log" >&2
+exit $rc

@@ -1,0 +1,13 @@
+{
+  "schema": "osate_headless.request.v1",
+  "model_dir": "/abs/path/to/models",
+  "root": "Pipeline::Plant.impl",
+  "analyses": ["compile", "instantiate", "emv2"],
+  "fta_starts": [
+    { "component": "filter", "start": "outgoing propagation on cmd{Bad_Command}" },
+    { "component": "filter", "start": "state Defective" }
+  ],
+  "hazard_format": "MILSTD882",
+  "requirement_property": "Req_Props::Requirement_IDs",
+  "requirement_ids": ["REQ-1", "REQ-2", "REQ-3"]
+}

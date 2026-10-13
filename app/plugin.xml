@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<!-- SPDX-License-Identifier: EPL-2.0 -->
+<plugin>
+   <extension id="analyze" point="org.eclipse.core.runtime.applications">
+      <application cardinality="singleton-global" thread="main" visible="true">
+         <run class="com.beyondordinary.osate.headless.Analyze"/>
+      </application>
+   </extension>
+</plugin>

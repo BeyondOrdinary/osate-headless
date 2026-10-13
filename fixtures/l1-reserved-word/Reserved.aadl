@@ -1,0 +1,13 @@
+-- 'sink' is an AADL reserved word. OSATE reports a parse error at the
+-- declaration; the lint names the cause.
+package Reserved
+public
+  device Speaker
+  end Speaker;
+  system Top
+  end Top;
+  system implementation Top.impl
+    subcomponents
+      sink: device Speaker;
+  end Top.impl;
+end Reserved;

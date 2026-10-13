@@ -1,0 +1,3 @@
+{ "root": "Case::Top.i", "fta_starts": [{"component": "rx", "start": "state Compromised"}],
+  "expect": { "status": "verified",
+              "cut_sets": {"rx|state Compromised": [["attacker-es-forged", "rx-key_extracted"]]} } }

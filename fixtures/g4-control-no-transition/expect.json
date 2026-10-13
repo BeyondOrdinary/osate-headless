@@ -1,0 +1,3 @@
+{ "root": "Repro::Top.i", "fta_starts": [{"component": "u", "start": "outgoing propagation on o{Omission}"}],
+  "expect": { "status": "verified", "note_absent": "G4 applied",
+              "cut_sets": {"u|outgoing propagation on o{Omission}": [["u-ea-fault_a"], ["u-ef-fault_f"]]} } }

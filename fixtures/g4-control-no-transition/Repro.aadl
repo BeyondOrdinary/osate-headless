@@ -1,0 +1,47 @@
+-- Control for upstream-issues/04: the reproduction without the Wait -> Dead
+-- transition. OSATE returns both cut sets.
+package Repro
+public
+  annex EMV2 {**
+    error types
+      Omission: type;
+      Fault_A: type;
+      Fault_F: type;
+    end types;
+    error behavior Life
+      use types Repro;
+      events
+        ea: error event {Fault_A};
+        ef: error event {Fault_F};
+      states
+        Op: initial state;
+        Wait: state;
+        Dead: state;
+      transitions
+        t_a: Op -[ ea ]-> Wait;
+        t_f: Op -[ ef ]-> Dead;
+    end behavior;
+  **};
+  device Unit
+    features
+      o: out data port;
+    annex EMV2 {**
+      use types Repro;
+      use behavior Repro::Life;
+      error propagations
+        o: out propagation {Omission};
+      end propagations;
+      component error behavior
+        propagations
+          p_wait: Wait -[ ]-> o{Omission};
+          p_dead: Dead -[ ]-> o{Omission};
+      end component;
+    **};
+  end Unit;
+  system Top
+  end Top;
+  system implementation Top.i
+    subcomponents
+      u: device Unit;
+  end Top.i;
+end Repro;

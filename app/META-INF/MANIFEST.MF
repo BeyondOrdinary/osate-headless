@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OSATE headless analysis
+Bundle-SymbolicName: com.beyondordinary.osate.headless;singleton:=true
+Bundle-Version: 0.1.0
+Bundle-Vendor: BeyondOrdinary
+Bundle-RequiredExecutionEnvironment: JavaSE-21
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.equinox.app,
+ org.eclipse.emf.ecore,
+ org.eclipse.emf.common,
+ org.eclipse.xtext,
+ org.eclipse.xtext.ui,
+ com.google.inject,
+ com.google.gson,
+ org.osate.aadl2,
+ org.osate.aadl2.modelsupport,
+ org.osate.aadl2.instantiation,
+ org.osate.xtext.aadl2,
+ org.osate.xtext.aadl2.ui,
+ org.osate.xtext.aadl2.errormodel,
+ org.osate.aadl2.errormodel.analysis,
+ org.osate.aadl2.errormodel.faulttree,
+ org.osate.aadl2.errormodel.faulttree.generation,
+ org.osate.aadl2.errormodel.propagationgraph
+Bundle-ActivationPolicy: lazy

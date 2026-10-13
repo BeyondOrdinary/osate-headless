@@ -1,0 +1,19 @@
+-- Workaround for upstream-issues/01: a local alias resolves.
+package PB
+public
+  with PA;
+  renames bus PA::B1;
+  system S1
+    features
+      x: requires bus access B1;
+  end S1;
+  system Top
+  end Top;
+  system implementation Top.i
+    subcomponents
+      s: system S1;
+      b: bus PA::B1;
+    connections
+      c: bus access b <-> s.x;
+  end Top.i;
+end PB;
